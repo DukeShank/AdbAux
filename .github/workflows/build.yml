@@ -6,13 +6,18 @@ on:
   push:
   pull_request:
 
+# The workflow only reads the code. Without this line, the access key that GitHub gives each run
+# could also change the repository, which is more than this workflow needs.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
 
@@ -29,7 +34,7 @@ jobs:
           "$hash  AdbAux.exe" | Out-File -Encoding ascii gui/bin/Release/net48/AdbAux.exe.sha256
           "SHA-256: $hash"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: AdbAux
           path: |
