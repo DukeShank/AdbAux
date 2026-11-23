@@ -109,6 +109,15 @@ namespace AdbAux.Tests
         }
 
         [Fact]
+        public void DescribesManagedAndChosenScrcpyFolders()
+        {
+            // Both folders AdbAux installs into count as managed, with or without a trailing backslash.
+            Assert.Equal("folder managed by AdbAux", ScrcpyLocator.Describe(Path.Combine(ScrcpyLocator.AppDir, "scrcpy")));
+            Assert.Equal("folder managed by AdbAux", ScrcpyLocator.Describe(ScrcpyLocator.LocalDir + "\\"));
+            Assert.Equal("folder you chose", ScrcpyLocator.Describe(@"C:\Tools\scrcpy"));
+        }
+
+        [Fact]
         public void NewerVersionComparesHigher()
         {
             Assert.True(ScrcpyInstaller.ParseVersion("v3.10") > ScrcpyInstaller.ParseVersion("scrcpy 3.9.2"));

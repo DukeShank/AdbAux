@@ -16,7 +16,7 @@
     <RootNamespace>AdbAux</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>       <!-- icon shown for AdbAux.exe in Explorer -->
-    <Version>0.5.2</Version>
+    <Version>0.5.3</Version>
     <Product>AdbAux</Product>
     <Description>Plays Android phone audio on Windows over USB using scrcpy</Description>
     <Authors>DukeShank</Authors>

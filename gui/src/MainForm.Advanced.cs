@@ -46,7 +46,7 @@ namespace AdbAux
         private readonly Button btnDefaults = new ThemedButton();
         private readonly Label lblPending = new Label();
 
-        private string pendingScrcpyFolder;       // chosen with Choose folder… / Find automatically, not applied yet (null = no change)
+        private string pendingScrcpyFolder;       // chosen with Choose folder… / Use AdbAux folder, not applied yet (null = no change)
         private bool startWithWindowsApplied;     // the registry entry as last read or written
         private bool checkingUpdates;             // a scrcpy update check or install is running
 
@@ -191,13 +191,15 @@ namespace AdbAux
             var scrcpyButtons = new FlowLayoutPanel { AutoSize = true, WrapContents = true, MaximumSize = new Size(560, 0) };
             scrcpyButtons.Controls.Add(NewButton(btnScrcpyUpdate, "Check for scrcpy updates", (s, e) => CheckScrcpyUpdates("")));
             scrcpyButtons.Controls.Add(NewButton(btnChooseFolder, "Choose folder…", BtnChooseFolder_Click));
-            scrcpyButtons.Controls.Add(NewButton(btnAutoFolder, "Find automatically", (s, e) => SetPendingScrcpyFolder("")));
+            scrcpyButtons.Controls.Add(NewButton(btnAutoFolder, "Use AdbAux folder", (s, e) => SetPendingScrcpyFolder("")));
             scrcpyButtons.Controls.Add(NewButton(btnOpenFolder, "Open folder", (s, e) => OpenInExplorer(controller.ScrcpyDir ?? ScrcpyLocator.AppDir)));
             scrcpyGroup.Body.Controls.Add(lblScrcpy);
             scrcpyGroup.Body.Controls.Add(lblScrcpyPending);
             scrcpyGroup.Body.Controls.Add(scrcpyButtons);
             scrcpyGroup.Body.Controls.Add(NewNote(
-                "Check for scrcpy updates compares the installed version with the latest official release and asks "
+                "AdbAux installs scrcpy in a scrcpy folder next to AdbAux.exe, or in your user profile "
+                + "(%LOCALAPPDATA%\\AdbAux\\scrcpy) when that folder cannot be written to, for example under Program Files. "
+                + "Check for scrcpy updates compares the installed version with the latest official release and asks "
                 + "before installing; adb is included in scrcpy and updated with it. A different folder is used after Apply."));
             AddRow(column, scrcpyGroup);
 
@@ -427,25 +429,31 @@ namespace AdbAux
         private async void ShowScrcpyInfo()
         {
             string dir = controller.ScrcpyDir;
-            string source = string.IsNullOrWhiteSpace(settings.ScrcpyFolder) ? "found automatically" : "chosen folder";
             if (dir == null)
             {
                 lblScrcpy.Text = string.IsNullOrWhiteSpace(settings.ScrcpyFolder)
-                    ? "scrcpy not found. Click \"Download or update scrcpy\"."
-                    : "scrcpy not found in the chosen folder: " + settings.ScrcpyFolder;
+                    ? "scrcpy not found. Click \"Check for scrcpy updates\" to install it."
+                    : "scrcpy not found in the folder you chose: " + settings.ScrcpyFolder;
                 lblAboutScrcpy.Text = "scrcpy: not found";
                 return;
             }
 
-            lblScrcpy.Text = dir + " (" + source + ")";
+            // Third line: what the folder is, so a folder in the user profile is not mistaken for a found copy.
+            string source = ScrcpyLocator.IsManagedFolder(dir)
+                ? "Folder managed by AdbAux. Check for scrcpy updates installs here."
+                : "Folder you chose. AdbAux does not change it.";
+            lblScrcpy.Text = dir + Environment.NewLine + source;
             lblAboutScrcpy.Text = "scrcpy: " + dir;
             try
             {
                 string version = await Task.Run(() => ScrcpyLocator.GetVersion(dir));
                 if (version != null && dir == controller.ScrcpyDir)
                 {
-                    lblScrcpy.Text = version + Environment.NewLine + dir + " (" + source + ")";
-                    lblAboutScrcpy.Text = version + Environment.NewLine + dir;
+                    // "scrcpy 5.0.1" instead of the full first line, which also contains the project's web address.
+                    Version number = ScrcpyInstaller.ParseVersion(version);
+                    string shown = number != null ? "scrcpy " + number : version;
+                    lblScrcpy.Text = shown + Environment.NewLine + dir + Environment.NewLine + source;
+                    lblAboutScrcpy.Text = shown + Environment.NewLine + dir;
                     Log(version);
                 }
             }
@@ -466,7 +474,7 @@ namespace AdbAux
         {
             lblScrcpyPending.Visible = pendingScrcpyFolder != null;
             lblScrcpyPending.Text = pendingScrcpyFolder == null ? ""
-                : "After Apply: " + (pendingScrcpyFolder.Length == 0 ? "found automatically" : pendingScrcpyFolder);
+                : "After Apply: " + (pendingScrcpyFolder.Length == 0 ? "folder managed by AdbAux" : pendingScrcpyFolder);
         }
 
         /// <summary>

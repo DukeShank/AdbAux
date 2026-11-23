@@ -103,6 +103,15 @@ namespace AdbAux
                 || string.Equals(full, Normalize(LocalDir), StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// What a scrcpy folder in use is, for the window and the log. Find only returns a chosen folder
+        /// or one of the two managed folders, so any other folder is the one the user chose.
+        /// </summary>
+        public static string Describe(string dir)
+        {
+            return IsManagedFolder(dir) ? "folder managed by AdbAux" : "folder you chose";
+        }
+
         /// <summary>The folder a download goes to: the managed folder in use, or a new managed folder.</summary>
         public static string ManagedInstallTarget(string currentDir)
         {

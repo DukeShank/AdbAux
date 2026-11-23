@@ -170,7 +170,7 @@ namespace AdbAux
             }
             else if (ScrcpyDir != oldDir)
             {
-                log("Using scrcpy in " + ScrcpyDir + ".");
+                log("Using scrcpy in " + ScrcpyDir + " (" + ScrcpyLocator.Describe(ScrcpyDir) + ").");
             }
             if (note != null)
             {
@@ -317,7 +317,7 @@ namespace AdbAux
             }
             if (ScrcpyDir == null)
             {
-                return Status("scrcpy not found. Use \"Download or update scrcpy\" on the Advanced tab.", StatusLevel.Red);
+                return Status("scrcpy not found. Use \"Check for scrcpy updates\" on the Advanced tab.", StatusLevel.Red);
             }
             if (session != null)
             {

@@ -75,7 +75,8 @@ Requires the .NET SDK (any current version; it can build for .NET Framework 4.8)
   version again, for repairs); it installs only after you confirm. The download is SHA-256 checked, only ever
   installed into a folder AdbAux manages (never into a folder you chose), and the old copy is kept until the
   new one is in place. adb is included in scrcpy and updated with it; an Android SDK adb is left to Android
-  Studio. **Choose folder…** and **Find automatically** (used after Apply); **Open folder**. If scrcpy is not
+  Studio. **Choose folder…** and **Use AdbAux folder** (used after Apply); **Open folder**. The section shows the
+  version, the folder, and whether it is a folder managed by AdbAux or one you chose. If scrcpy is not
   found at start-up, AdbAux checks for the latest release and offers to install it.
 
 **Volume mixer icon.** The volume mixer shows the icon of the program that plays the audio, which is

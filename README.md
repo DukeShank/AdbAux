@@ -47,7 +47,8 @@ Auto Blocker back on when you disconnect. To revoke access: **Developer options 
 ### PC
 1. Get `AdbAux.exe`: build it from source (see below) or download it from the Releases page once available.
 2. Put it in a folder of its own and start it. On first start it offers to download scrcpy (about 12 MB)
-   into a `scrcpy` folder next to it.
+   into a `scrcpy` folder next to it. If that folder cannot be written to (for example under
+   `C:\Program Files`), scrcpy goes to `%LOCALAPPDATA%\AdbAux\scrcpy` instead.
 3. Recommended: set your output device's Windows format to 48 kHz, so Windows does not resample the
    stream. Press Win+R, run `mmsys.cpl`, open the device's **Properties > Advanced**, choose **24 bit, 48000 Hz**.
 
