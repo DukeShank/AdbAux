@@ -1,0 +1,16 @@
+# Line endings in the repository: Git stores text files with LF and checks them out with the
+# endings below, so Windows scripts keep CRLF (batch files can misbehave with LF-only endings).
+* text=auto
+*.cmd      text eol=crlf
+*.bat      text eol=crlf
+*.ps1      text eol=crlf
+*.cs       text eol=crlf
+*.csproj   text eol=crlf
+*.manifest text eol=crlf
+*.md       text eol=crlf
+
+# Binary files: never change line endings or show text diffs.
+*.ico binary
+*.png binary
+*.exe binary
+*.zip binary

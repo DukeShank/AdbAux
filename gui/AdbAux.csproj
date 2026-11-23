@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    AdbAux: Windows GUI for streaming phone audio over USB with scrcpy.
+    Target: .NET Framework 4.8, which is part of Windows 10 (1903+) and Windows 11,
+    so the built AdbAux.exe runs without installing any runtime and needs no extra DLLs.
+    Build:  dotnet build AdbAux.csproj -c Release   (or run build.cmd)
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>                 <!-- Windows GUI program (no console window) -->
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>             <!-- 64-bit program -->
+    <LangVersion>7.3</LangVersion>                   <!-- C# version fully supported on .NET Framework -->
+    <AssemblyName>AdbAux</AssemblyName>
+    <RootNamespace>AdbAux</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>       <!-- icon shown for AdbAux.exe in Explorer -->
+    <Version>0.5.2</Version>
+    <Product>AdbAux</Product>
+    <Description>Plays Android phone audio on Windows over USB using scrcpy</Description>
+    <Authors>DukeShank</Authors>
+    <Copyright>Copyright (c) 2026 DukeShank. MIT License.</Copyright>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <DebugType>embedded</DebugType>                  <!-- debug info inside the exe, no separate .pdb file -->
+    <!-- The debug info normally records the full path of each source file, which would show the local
+         user and folder names in a published exe. PathMap replaces the project folder with "/_/". -->
+    <PathMap>$(MSBuildProjectDirectory)=/_/</PathMap>
+    <Deterministic>true</Deterministic>              <!-- same source, same exe: makes builds comparable -->
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <!-- Parts of .NET Framework used by the program (all built into Windows). -->
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />     <!-- window, buttons, tray icon -->
+    <Reference Include="System.Drawing" />           <!-- colours, fonts, icons -->
+    <Reference Include="System.Net.Http" />          <!-- downloading scrcpy from GitHub -->
+    <Reference Include="System.IO.Compression" />    <!-- reading the scrcpy zip -->
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.Extensions" />    <!-- JSON parser for the GitHub API reply -->
+  </ItemGroup>
+
+  <!-- The icon is also embedded as a resource, so the window and tray can use all its sizes. -->
+  <ItemGroup>
+    <EmbeddedResource Include="app.ico" LogicalName="AdbAux.app.ico" />
+  </ItemGroup>
+
+</Project>

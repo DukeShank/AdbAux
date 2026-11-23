@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Unit tests for AdbAux (xUnit). Run: test.cmd in the repository folder
+    (test.cmd runs dotnet test on this project as a 64-bit process.)
+    The first run downloads the test packages below from nuget.org.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>             <!-- same as AdbAux.exe, which the tests load -->
+    <LangVersion>7.3</LangVersion>
+    <IsPackable>false</IsPackable>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gui\AdbAux.csproj" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>

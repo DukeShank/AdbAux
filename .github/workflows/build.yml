@@ -1,0 +1,37 @@
+# Builds AdbAux and runs the unit tests on every push and pull request.
+# The built AdbAux.exe and its SHA-256 checksum are kept as a downloadable artifact of the run.
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        run: dotnet build gui/AdbAux.csproj -c Release -nologo
+
+      - name: Test
+        run: dotnet test tests/AdbAux.Tests/AdbAux.Tests.csproj -c Release -nologo -- RunConfiguration.TargetPlatform=x64
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash gui/bin/Release/net48/AdbAux.exe -Algorithm SHA256).Hash
+          "$hash  AdbAux.exe" | Out-File -Encoding ascii gui/bin/Release/net48/AdbAux.exe.sha256
+          "SHA-256: $hash"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AdbAux
+          path: |
+            gui/bin/Release/net48/AdbAux.exe
+            gui/bin/Release/net48/AdbAux.exe.sha256

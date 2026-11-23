@@ -1,0 +1,26 @@
+# Build output
+gui/bin/
+gui/obj/
+tests/**/bin/
+tests/**/obj/
+
+# Built program (to be published as a GitHub Release, not stored in the repository)
+/AdbAux.exe
+
+# scrcpy is downloaded by AdbAux, not stored in the repository (.download and .old: during an update)
+/scrcpy/
+/scrcpy.download/
+/scrcpy.old/
+
+# Personal files that must never be uploaded: logs, settings backups, exported profiles
+*.log
+settings.xml
+AdbAux settings*.xml
+AdbAux profile*.xml
+
+# Visual Studio / editor files
+.vs/
+*.user
+
+# Icon preview images from gui/tools/make_icon.py
+gui/tools/*.png
