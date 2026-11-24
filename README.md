@@ -181,6 +181,11 @@ AdbAux has no installer. To remove it and everything it created:
   and other names mentioned are trademarks of their respective owners and are used only to identify
   products. AdbAux is an independent project, not affiliated with or endorsed by any of them.
 
+## Bug reports and security
+
+Bug reports and suggestions go to the issue tracker; see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Report security problems privately, as described in [`SECURITY.md`](SECURITY.md).
+
 ## Licence and credits
 
 AdbAux is released under the [MIT License](LICENSE). It uses scrcpy by Genymobile (Apache License 2.0),

@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in AdbAux does not work as described.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before posting, remove your phone's serial number from any log you include (replace it, for example with XXXX).
+        Security problems are not reported here: see the Security tab of this repository.
+  - type: input
+    id: version
+    attributes:
+      label: AdbAux version
+      description: Shown on the About tab, for example 0.6.0.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: For example Windows 11 24H2. Press Win+R and run winver to see it.
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone model and Android version
+      description: For example Samsung Galaxy S25 Ultra, Android 16.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log (optional)
+      description: The relevant lines from the Log tab, with the serial number removed.
+      render: text
