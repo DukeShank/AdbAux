@@ -32,6 +32,31 @@ Nothing is installed on the phone.
 | Phone | Android 11 or later (Android 12 or later recommended), USB debugging enabled |
 | Cable | A USB data cable (not a charge-only cable) |
 
+## Download and verify
+
+Download `AdbAux.exe` and `AdbAux.exe.sha256` from the [Releases page](https://github.com/DukeShank/AdbAux/releases).
+Before the first start, check the file in one or both of these ways:
+
+1. **Checksum: the file is complete and unchanged.** In PowerShell, in the download folder:
+   ```
+   Get-FileHash .\AdbAux.exe -Algorithm SHA256
+   ```
+   The `Hash` value must match the value in `AdbAux.exe.sha256` and in the release notes.
+2. **Build attestation: where the file comes from.** With the [GitHub CLI](https://cli.github.com), signed in
+   with `gh auth login`:
+   ```
+   gh attestation verify AdbAux.exe -R DukeShank/AdbAux
+   ```
+   A successful check confirms that this exact file was built by this repository's release workflow on
+   GitHub, from the published source code. The attestations are also listed in the repository's Actions tab.
+
+The checksum alone detects a damaged or altered download, but it cannot show who made the file, because it
+comes from the same page as the file. The attestation adds that proof.
+
+**Windows SmartScreen.** `AdbAux.exe` is not code-signed, so Windows may show "Windows protected your PC"
+when a new version is started for the first time. After checking the file as above, choose
+**More info > Run anyway**.
+
 ## Setup
 
 ### Phone (one time)
@@ -46,7 +71,7 @@ An authorised PC can control the phone over USB. Only authorise your own PC, and
 Auto Blocker back on when you disconnect. To revoke access: **Developer options > Revoke USB debugging authorisations**.
 
 ### PC
-1. Get `AdbAux.exe`: build it from source (see below) or download it from the Releases page once available.
+1. Get `AdbAux.exe`: download and check it as described above, or build it from source (see below).
 2. Put it in a folder of its own and start it. On first start it offers to download scrcpy (about 12 MB)
    into a `scrcpy` folder next to it. If that folder cannot be written to (for example under
    `C:\Program Files`), scrcpy goes to `%LOCALAPPDATA%\AdbAux\scrcpy` instead.
