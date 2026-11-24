@@ -160,6 +160,8 @@ the old one has closed).
 | "Start with Windows" entry | Registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `AdbAux` |
 | scrcpy | `scrcpy` folder next to `AdbAux.exe`, a folder you choose, or `%LOCALAPPDATA%\AdbAux\scrcpy` |
 | Log | `%LOCALAPPDATA%\AdbAux\logs\adbaux.log` (and `adbaux.old.log`) |
+| adb keys (made by adb, shared with other adb tools) | `%USERPROFILE%\.android\adbkey`, `adbkey.pub` |
+| adb server | `adb.exe` keeps running after AdbAux exits (standard adb behaviour); see README, *Uninstalling* |
 
 ## Source files
 

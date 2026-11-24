@@ -163,11 +163,28 @@ for example in a bug report. Unexpected errors are written to the same file.
 
 ## Uninstalling
 
-1. On the Advanced tab, untick **Start with Windows** and click **Apply** (removes the registry entry).
+AdbAux has no installer. To remove it and everything it created:
+
+1. On the Advanced tab, untick **Start with Windows** and click **Apply**. This removes the registry value
+   `AdbAux` under `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run`.
 2. Right-click the tray icon and choose **Exit**.
-3. Delete the folder containing `AdbAux.exe` (with its `scrcpy` folder), `%APPDATA%\AdbAux` (settings)
-   and `%LOCALAPPDATA%\AdbAux` (logs, and scrcpy if it was installed there).
-4. On the phone, turn off USB debugging if you no longer need it, and switch Auto Blocker back on (Samsung).
+3. Stop the adb server. It keeps running after AdbAux exits (standard adb behaviour), and while it runs,
+   Windows cannot delete the scrcpy folder. Either end **adb.exe** in Task Manager, or run `kill-server`
+   with the adb shown on the Advanced tab under *adb*, for example
+   `& "C:\Tools\AdbAux\scrcpy\adb.exe" kill-server` in PowerShell. This also disconnects other adb
+   connections, for example a device connected over Wi-Fi.
+4. Delete:
+   - the folder containing `AdbAux.exe`, with its `scrcpy` folder;
+   - `%APPDATA%\AdbAux` (settings);
+   - `%LOCALAPPDATA%\AdbAux` (logs, and scrcpy if it was installed there).
+
+   To open such a folder, paste its path into the File Explorer address bar.
+5. Optional: delete exported profiles and settings backups from the folders where you saved them.
+6. Optional, and only if you use no other adb tool such as Android Studio: delete `adbkey` and
+   `adbkey.pub` in `%USERPROFILE%\.android`. These are adb's keys, which your phones authorised. adb makes
+   new keys when needed, and each phone then asks for authorisation again.
+7. On the phone: **Developer options > Revoke USB debugging authorisations**, turn off USB debugging if
+   you no longer need it, and turn Auto Blocker back on (Samsung).
 
 ## Disclaimer
 
