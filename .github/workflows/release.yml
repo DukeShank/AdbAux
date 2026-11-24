@@ -1,0 +1,93 @@
+# Prepares a release when a version tag such as v0.6.0 is pushed:
+#   1. checks that the tag matches <Version> in gui/AdbAux.csproj;
+#   2. builds AdbAux and runs the unit tests;
+#   3. writes AdbAux.exe.sha256;
+#   4. records a build attestation: a signed record that this workflow built AdbAux.exe from this
+#      commit, which anyone can check with "gh attestation verify";
+#   5. creates a DRAFT release with AdbAux.exe and AdbAux.exe.sha256. The maintainer writes the change
+#      summary and publishes it by hand.
+# Attestations work only in a public repository on GitHub Free, so push the first tag after going public.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Default for all jobs: read only. The release job below gets exactly the extra rights it needs.
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write           # create the draft release and upload its files
+      id-token: write           # obtain the identity token that signs the attestation
+      attestations: write       # store the attestation
+      artifact-metadata: write  # store the record of the attested file
+    env:
+      # Values from GitHub are passed as environment variables, not written into the scripts,
+      # so that no text from a tag name can become part of a command.
+      TAG: ${{ github.ref_name }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check that the tag matches the version in AdbAux.csproj
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content gui/AdbAux.csproj
+          $version = ($project.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+          if ($env:TAG -ne "v$version") {
+            Write-Error "Tag $env:TAG does not match <Version>$version</Version> in gui/AdbAux.csproj."
+            exit 1
+          }
+          "Releasing AdbAux $version"
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        run: dotnet build gui/AdbAux.csproj -c Release -nologo
+
+      - name: Test
+        run: dotnet test tests/AdbAux.Tests/AdbAux.Tests.csproj -c Release -nologo -- RunConfiguration.TargetPlatform=x64
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash gui/bin/Release/net48/AdbAux.exe -Algorithm SHA256).Hash
+          "$hash  AdbAux.exe" | Out-File -Encoding ascii gui/bin/Release/net48/AdbAux.exe.sha256
+          "SHA-256: $hash"
+
+      - name: Record build attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: gui/bin/Release/net48/AdbAux.exe
+
+      - name: Create draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = $env:TAG.Substring(1)
+          $hash = (Get-Content gui/bin/Release/net48/AdbAux.exe.sha256).Split(' ')[0]
+          $notes = @"
+          ## Changes
+
+          - (Write the summary of changes here before publishing.)
+
+          ## Verify this download
+
+          SHA-256 of AdbAux.exe: ``$hash``
+
+          - In PowerShell, ``Get-FileHash .\AdbAux.exe -Algorithm SHA256`` must show the same value.
+          - With the GitHub CLI, ``gh attestation verify AdbAux.exe -R $env:REPO`` confirms that this file was built by this repository's release workflow from tag $env:TAG.
+
+          AdbAux.exe is not code-signed, so Windows SmartScreen may warn when it is started for the first time. See the README section "Download and verify".
+          "@
+          $notes | Out-File -Encoding utf8 release-notes.md
+          gh release create $env:TAG gui/bin/Release/net48/AdbAux.exe gui/bin/Release/net48/AdbAux.exe.sha256 `
+            --draft --verify-tag --title "AdbAux $version" --notes-file release-notes.md
