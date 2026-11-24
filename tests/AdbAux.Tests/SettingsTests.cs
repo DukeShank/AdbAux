@@ -10,7 +10,7 @@ namespace AdbAux.Tests
         // Settings that are not on the Advanced tab, so Apply neither compares nor copies them.
         private static readonly string[] NotOnAdvancedTab =
         {
-            "Profiles", "LoudModeWarningShown", "WindowLeft", "WindowTop", "WindowWidth", "WindowHeight", "WindowMaximized"
+            "Profiles", "Updates", "LoudModeWarningShown", "WindowLeft", "WindowTop", "WindowWidth", "WindowHeight", "WindowMaximized"
         };
 
         [Fact]

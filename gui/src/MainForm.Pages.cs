@@ -12,10 +12,12 @@ namespace AdbAux
         private void BuildUi()
         {
             var tabs = new ThemedTabControl { Dock = DockStyle.Fill };
+            mainTabs = tabs;
+            aboutPage = BuildAboutPage();
             tabs.TabPages.Add(BuildBasicPage());
             tabs.TabPages.Add(BuildAdvancedPage());
             tabs.TabPages.Add(BuildLogPage());
-            tabs.TabPages.Add(BuildAboutPage());
+            tabs.TabPages.Add(aboutPage);
             Controls.Add(tabs);
         }
 
@@ -37,6 +39,13 @@ namespace AdbAux
             statusRow.Controls.Add(statusDot);
             statusRow.Controls.Add(statusText);
             AddRow(column, statusRow);
+
+            // Update found, or automatic update check failed (hidden otherwise; see MainForm.Updates.cs).
+            lblUpdateLine.AutoSize = true;
+            lblUpdateLine.MaximumSize = new Size(560, 0);
+            lblUpdateLine.Visible = false;
+            lblUpdateLine.LinkClicked += UpdateLine_LinkClicked;
+            AddRow(column, lblUpdateLine);
 
             // Content type.
             SectionBox contentGroup = new SectionBox("What are you playing?");
@@ -68,10 +77,13 @@ namespace AdbAux
             setupLink.LinkClicked += (s, e) => ShowPhoneSetupHelp();
             AddRow(column, setupLink);
 
-            AddRow(column, NewNote(
+            AddRow(column, NewInfoNote(
+                "Changes here apply at once; a running stream restarts with a gap of about one second.",
+                "Basic tab",
                 "Changes here apply at once; a running stream restarts, with a gap of about one second. "
-                + "In the Windows volume mixer you can choose which output device scrcpy plays on. "
-                + "Closing this window keeps AdbAux running in the notification area."));
+                + "In the Windows volume mixer (Open volume mixer) you can choose which output device scrcpy plays on. "
+                + "Closing this window keeps AdbAux running in the notification area, unless that option is turned "
+                + "off on the Advanced tab."));
             MakeTextFlow(column);
             return page;
         }
@@ -106,19 +118,22 @@ namespace AdbAux
             bar.Controls.Add(clear);
             bar.Controls.Add(openFolder);
 
-            var notice = new Label
+            var notice = new InfoNote(
+                "For your own troubleshooting, stored only on this PC. It contains your phone's model and serial "
+                + "number: remove them before sharing it.",
+                "Log",
+                AppLog.Notice + " Saved to: " + AppLog.FilePath + ". The file is limited to about 1 MB; the previous "
+                + "file is kept as adbaux.old.log. Clear view clears only this view; the file is kept.")
             {
-                Text = AppLog.Notice + " Saved to: " + AppLog.FilePath,
                 Dock = DockStyle.Top,
-                AutoSize = true,
-                MaximumSize = new Size(590, 0),
-                Padding = new Padding(0, 0, 0, 8),
-                Tag = "note"
+                MaximumSize = new Size(590, 0)
             };
+            var gap = new Panel { Dock = DockStyle.Top, Height = 8 };
 
             // Docked controls are laid out from the last added to the first: the bar takes the
-            // bottom edge, the notice the top edge, and the log fills the rest.
+            // bottom edge, the notice the top edge with a gap under it, and the log fills the rest.
             page.Controls.Add(logField);
+            page.Controls.Add(gap);
             page.Controls.Add(notice);
             page.Controls.Add(bar);
             page.SizeChanged += (s, e) =>
@@ -150,6 +165,16 @@ namespace AdbAux
             header.Controls.Add(picture);
             header.Controls.Add(title);
             AddRow(column, header);
+
+            // Updates: manual check, and the result of the last automatic check.
+            AddRow(column, NewButton(btnAdbAuxUpdate, "Check for AdbAux updates", (s, e) => CheckAdbAuxUpdates()));
+            lblUpdateResult.AutoSize = true;
+            lblUpdateResult.MaximumSize = new Size(560, 0);
+            lblUpdateResult.Tag = "note";
+            AddRow(column, lblUpdateResult);
+            var releasesLink = new LinkLabel { Text = GitHub.AdbAuxReleasesUrl, AutoSize = true };
+            releasesLink.LinkClicked += (s, e) => OpenUrl(GitHub.AdbAuxReleasesUrl);
+            AddRow(column, releasesLink);
 
             AddRow(column, NewText(
                 "Plays an Android phone's audio on this PC over a USB cable, uncompressed "
@@ -214,8 +239,10 @@ namespace AdbAux
             {
                 var label = child as Label;
                 var flow = child as FlowLayoutPanel;
+                var info = child as InfoNote;
                 if ((label != null && label.AutoSize && label.MaximumSize.Width > 0)
-                    || (flow != null && flow.WrapContents && flow.MaximumSize.Width > 0))
+                    || (flow != null && flow.WrapContents && flow.MaximumSize.Width > 0)
+                    || (info != null && info.MaximumSize.Width > 0))
                 {
                     found.Add(child);
                 }
@@ -299,6 +326,19 @@ namespace AdbAux
                 MaximumSize = new Size(560, 0),
                 Margin = new Padding(3, 4, 3, 6),
                 Tag = "note"   // shown in the secondary text colour of the current theme
+            };
+        }
+
+        /// <summary>
+        /// A short description with an (i) button that opens the details (see InfoNote.cs). The short text
+        /// holds what is needed to decide, including any privacy or safety fact; the details hold the rest.
+        /// </summary>
+        private static InfoNote NewInfoNote(string text, string title, string details)
+        {
+            return new InfoNote(text, title, details)
+            {
+                MaximumSize = new Size(560, 0),
+                Margin = new Padding(3, 4, 3, 6)
             };
         }
 

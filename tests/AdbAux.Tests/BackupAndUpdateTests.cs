@@ -44,6 +44,23 @@ namespace AdbAux.Tests
         }
 
         [Fact]
+        public void BackupKeepsTheUpdateAnswerButNotThisPcsSchedule()
+        {
+            var settings = new AppSettings { CheckForUpdates = UpdateCheckChoice.Yes };
+            settings.Updates.SkippedAdbAuxVersion = "v0.7.0";
+            settings.Updates.Failures = 2;
+            string path = Path.Combine(folder, "backup-updates.xml");
+
+            SettingsBackup.Write(settings, path, "0.6.0");
+            AppSettings restored = SettingsBackup.Read(path);
+
+            Assert.Equal(UpdateCheckChoice.Yes, restored.CheckForUpdates);
+            Assert.Equal("", restored.Updates.SkippedAdbAuxVersion);
+            Assert.Equal(0, restored.Updates.Failures);
+            Assert.Equal("v0.7.0", settings.Updates.SkippedAdbAuxVersion);   // the settings in use are not changed
+        }
+
+        [Fact]
         public void RestoreRefusesOtherFilesAndDocumentTypeDefinitions()
         {
             string profilePath = Path.Combine(folder, "profile.xml");

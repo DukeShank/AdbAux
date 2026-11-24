@@ -23,9 +23,15 @@ namespace AdbAux
         private SectionBox BuildProfileSection()
         {
             var group = new SectionBox("Tested profiles");
-            group.Body.Controls.Add(NewNote(
+            group.Body.Controls.Add(NewInfoNote(
+                "Choosing a profile fills in its values on this tab; click Apply to use them.",
+                "Tested profiles",
                 "Keep the values that work for a phone and audio device combination, and switch between them. "
-                + "Choosing a profile fills in its values on this tab; click Apply to use them."));
+                + "Choosing a profile fills in its values on this tab; click Apply to use them. A profile stores the "
+                + "three buffers, the output buffer and the start-up selections; extra scrcpy options are not stored. "
+                + "Save as new…, Update…, Delete, Import… and Export… change the stored profiles at once. A profile can "
+                + "be selected automatically when its phone model is connected (one profile per model). Exported files "
+                + "do not contain the phone's serial number."));
             cbProfile.Width = 360;
             cbProfile.SelectedIndexChanged += CbProfile_SelectedIndexChanged;
             group.Body.Controls.Add(Labeled("Profile", cbProfile));

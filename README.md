@@ -130,9 +130,20 @@ to the PC through ADB. Nothing remains installed on the phone.
 
 ## Privacy and logs
 
-AdbAux has no telemetry and collects no data. It connects to the internet only to check for and download
-scrcpy, from `api.github.com` and `github.com`: when you click *Check for scrcpy updates*, or at start-up
-if scrcpy is not found. Audio travels only over the USB cable between the phone and the PC.
+AdbAux has no telemetry and collects no data. It connects to the internet only for the following, and only
+to GitHub (`api.github.com` for release information, `github.com` for downloads):
+
+- **Automatic update check (optional).** At first start, AdbAux asks whether it may check for updates. If you
+  answer Yes, it asks GitHub once a day for the latest published versions of AdbAux and scrcpy, and shows a
+  notification when a newer version exists. Turn it on or off on the Advanced tab, under *General*.
+- **Manual checks.** *Check for AdbAux updates* (About tab) and *Check for scrcpy updates* (Advanced tab),
+  only when you click them.
+- **scrcpy download.** At first start, if scrcpy is not found, AdbAux asks whether to download it, and contacts
+  GitHub only if you answer OK. Updates of scrcpy are also installed only after you confirm.
+
+Each request sends GitHub this PC's IP address and the program name and version (for example `AdbAux/0.6.0`);
+nothing else. AdbAux never downloads or replaces its own exe: for a new AdbAux version, it opens the release
+page. Audio travels only over the USB cable between the phone and the PC.
 
 AdbAux keeps a log for **your own troubleshooting** in `%LOCALAPPDATA%\AdbAux\logs\adbaux.log`
 (limited to about 1 MB; the previous file is kept as `adbaux.old.log`). It stays on your PC and is never

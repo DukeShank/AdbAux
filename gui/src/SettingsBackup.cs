@@ -28,11 +28,14 @@ namespace AdbAux
 
         public static void Write(AppSettings settings, string path, string appVersion)
         {
+            // The update-check schedule and skipped versions belong to this PC, so they are left out.
+            AppSettings copy = settings.Clone();
+            copy.Updates = null;
             SafeXml.Write(new SettingsBackupFile
             {
                 ExportedBy = "AdbAux " + appVersion,
                 Created = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                Settings = settings
+                Settings = copy
             }, path);
         }
 

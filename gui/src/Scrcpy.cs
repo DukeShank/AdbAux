@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace AdbAux
 {
@@ -145,8 +144,6 @@ namespace AdbAux
     /// </summary>
     public static class ScrcpyInstaller
     {
-        private const string LatestReleaseApi = "https://api.github.com/repos/Genymobile/scrcpy/releases/latest";
-
         /// <summary>
         /// The first version number in a text: "scrcpy 5.0.1 &lt;https://...&gt;" or "v5.0.1" give 5.0.1.
         /// Returns null if there is none.
@@ -158,52 +155,52 @@ namespace AdbAux
             return m.Success && Version.TryParse(m.Value, out version) ? version : null;
         }
 
-        private static HttpClient NewClient()
-        {
-            // .NET Framework may default to old TLS versions that GitHub refuses.
-            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-            var http = new HttpClient();
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("AdbAux/" + AppInfo.Version);   // GitHub's API requires a User-Agent
-            return http;
-        }
-
-        /// <summary>Asks GitHub for the latest release and the two files AdbAux needs from it.</summary>
+        /// <summary>
+        /// Asks GitHub for the latest release and the two files AdbAux needs from it.
+        /// Throws UpdateCheckException with the type of failure.
+        /// </summary>
         public static async Task<ScrcpyRelease> GetLatestAsync()
         {
-            using (HttpClient http = NewClient())
+            Dictionary<string, object> data = await GitHub.GetLatestReleaseAsync(GitHub.ScrcpyRepository).ConfigureAwait(false);
+            if (data == null)
             {
-                string json = await http.GetStringAsync(LatestReleaseApi).ConfigureAwait(false);
-                var data = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(json);
-                var release = new ScrcpyRelease { Tag = Convert.ToString(data["tag_name"]) };
-                release.Version = ParseVersion(release.Tag);
-
-                foreach (object item in (IEnumerable)data["assets"])
-                {
-                    var asset = (IDictionary<string, object>)item;
-                    string name = Convert.ToString(asset["name"]);
-                    string url = Convert.ToString(asset["browser_download_url"]);
-                    if (release.ZipName == null
-                        && name.StartsWith("scrcpy-win64-", StringComparison.OrdinalIgnoreCase)
-                        && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                    {
-                        release.ZipName = name;
-                        release.ZipUrl = url;
-                    }
-                    else if (name == "SHA256SUMS.txt")
-                    {
-                        release.SumsUrl = url;
-                    }
-                }
-                if (release.ZipUrl == null)
-                {
-                    throw new InvalidOperationException("Release " + release.Tag + " has no scrcpy-win64 zip.");
-                }
-                if (release.SumsUrl == null)
-                {
-                    throw new InvalidOperationException("Release " + release.Tag + " has no SHA256SUMS.txt, so the download cannot be verified.");
-                }
-                return release;
+                throw new UpdateCheckException(UpdateFailure.UnexpectedReply, "GitHub lists no published scrcpy release.", null);
             }
+            var release = new ScrcpyRelease { Tag = Convert.ToString(data["tag_name"]) };
+            release.Version = ParseVersion(release.Tag);
+
+            var assets = data.ContainsKey("assets") ? data["assets"] as IEnumerable : null;
+            foreach (object item in assets ?? new object[0])
+            {
+                var asset = item as IDictionary<string, object>;
+                if (asset == null || !asset.ContainsKey("name") || !asset.ContainsKey("browser_download_url"))
+                {
+                    continue;
+                }
+                string name = Convert.ToString(asset["name"]);
+                string url = Convert.ToString(asset["browser_download_url"]);
+                if (release.ZipName == null
+                    && name.StartsWith("scrcpy-win64-", StringComparison.OrdinalIgnoreCase)
+                    && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    release.ZipName = name;
+                    release.ZipUrl = url;
+                }
+                else if (name == "SHA256SUMS.txt")
+                {
+                    release.SumsUrl = url;
+                }
+            }
+            if (release.ZipUrl == null)
+            {
+                throw new UpdateCheckException(UpdateFailure.UnexpectedReply, "Release " + release.Tag + " has no scrcpy-win64 zip.", null);
+            }
+            if (release.SumsUrl == null)
+            {
+                throw new UpdateCheckException(UpdateFailure.UnexpectedReply,
+                    "Release " + release.Tag + " has no SHA256SUMS.txt, so the download cannot be verified.", null);
+            }
+            return release;
         }
 
         /// <param name="targetDir">Must be a folder AdbAux manages (it is replaced completely).</param>
@@ -218,7 +215,7 @@ namespace AdbAux
                     "Refusing to replace a folder that AdbAux does not manage: " + targetDir);
             }
 
-            using (HttpClient http = NewClient())
+            using (HttpClient http = GitHub.NewClient())
             {
                 string tag = release.Tag;
                 string zipName = release.ZipName;

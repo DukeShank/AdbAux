@@ -72,7 +72,10 @@ namespace AdbAux
             bufferGroup.Body.Controls.Add(BufferRowPanel("Music", rowMusic));
             bufferGroup.Body.Controls.Add(BufferRowPanel("Video", rowVideo));
             bufferGroup.Body.Controls.Add(BufferRowPanel("Low latency", rowLowLatency));
-            bufferGroup.Body.Controls.Add(NewNote(
+            bufferGroup.Body.Controls.Add(NewInfoNote(
+                "A smaller buffer gives less delay but a higher risk of clicks (" + Limits.MinBufferMs + " to "
+                + Limits.MaxBufferMs + " ms).",
+                "Buffer for each content type",
                 "The Basic tab uses these buffers, in milliseconds (" + Limits.MinBufferMs + " to " + Limits.MaxBufferMs
                 + "). A smaller buffer gives less delay but a higher risk of clicks. Tested: Amazon Music HD plays "
                 + "without clicks from 40 ms (36 ms with all sounds), YouTube and Twitch from 20 ms; clicks start at about 15 ms."));
@@ -101,10 +104,12 @@ namespace AdbAux
             numOutputBuffer.Maximum = Limits.MaxOutputBufferMs;
             optionsGroup.Body.Controls.Add(Labeled("Output buffer (ms)", new ThemedField(numOutputBuffer, 96)));
             optionsGroup.Body.Controls.Add(Labeled("Extra options", new ThemedField(txtExtra, 360)));
-            optionsGroup.Body.Controls.Add(NewNote(
+            optionsGroup.Body.Controls.Add(NewInfoNote(
+                "Change the output buffer only with good reason; the scrcpy default is 10 ms.",
+                "scrcpy options",
                 "Output buffer: the scrcpy default is 10 ms, and scrcpy advises changing it only with good reason. "
-                + "Extra options are added to the scrcpy command, for example audio-output-buffer=5 (the leading -- "
-                + "is optional). Put a value with spaces in double quotes. Profiles do not store extra options."));
+                + "Extra options are added to the scrcpy command unchanged, for example audio-output-buffer=5 (the "
+                + "leading -- is optional). Put a value with spaces in double quotes. Profiles do not store extra options."));
             AddRow(column, optionsGroup);
 
             // Notifications.
@@ -137,9 +142,12 @@ namespace AdbAux
             adbGroup.Body.Controls.Add(Labeled("adb to use", cbAdb));
             adbGroup.Body.Controls.Add(Labeled("Location of adb.exe", adbPathRow));
             adbGroup.Body.Controls.Add(lblAdb);
-            adbGroup.Body.Controls.Add(NewNote(
+            adbGroup.Body.Controls.Add(NewInfoNote(
+                "Use the same adb as Android Studio or any other adb tool you use.",
+                "adb (Android Debug Bridge)",
                 "If you also use Android Studio or another adb tool, choose the same adb here. Two different adb "
-                + "versions keep restarting each other's background server, which interrupts both tools."));
+                + "versions keep restarting each other's background server, which interrupts both tools. The adb "
+                + "included with scrcpy is updated together with scrcpy."));
             AddRow(column, adbGroup);
 
             // Program behaviour.
@@ -147,7 +155,9 @@ namespace AdbAux
             programGroup.Body.Controls.Add(NewCheckBox(chkAutoStart, "Start streaming automatically when the phone is connected"));
             programGroup.Body.Controls.Add(NewCheckBox(chkPauseMedia, "Pause the phone's media when I stop streaming"));
             programGroup.Body.Controls.Add(NewCheckBox(chkResumeMedia, "Resume the phone's media when streaming starts"));
-            programGroup.Body.Controls.Add(NewNote(
+            programGroup.Body.Controls.Add(NewInfoNote(
+                "Both use the phone's media keys over USB.",
+                "Pause and resume the phone's media",
                 "Both use the phone's media keys over USB. Pausing applies to Stop and Exit in AdbAux (not to unplugging "
                 + "the cable or Restart AdbAux), and only when an app is playing. Resuming applies when streaming starts "
                 + "with Start or automatically when the phone is connected, not when a change of settings restarts it; "
@@ -156,10 +166,21 @@ namespace AdbAux
             programGroup.Body.Controls.Add(NewCheckBox(chkTray, "Keep AdbAux running in the notification area when the window is closed"));
             programGroup.Body.Controls.Add(NewCheckBox(chkStartWithWindows, "Start with Windows, hidden in the notification area"));
             programGroup.Body.Controls.Add(NewCheckBox(chkMixerIcon, "Show the AdbAux icon in the Windows volume mixer"));
-            programGroup.Body.Controls.Add(NewNote(
+            programGroup.Body.Controls.Add(NewInfoNote(
+                "Runs a copy of scrcpy.exe with the AdbAux icon; scrcpy.exe itself is not changed.",
+                "AdbAux icon in the volume mixer",
                 "The volume mixer shows the icon of the program playing the audio, scrcpy. With this option, "
                 + "AdbAux runs a copy of scrcpy.exe with the AdbAux icon (" + MixerIcon.CopyName + " in the scrcpy "
                 + "folder; scrcpy.exe is not changed). Not available for a scrcpy folder you chose yourself."));
+            programGroup.Body.Controls.Add(NewCheckBox(chkUpdates, "Check for AdbAux and scrcpy updates once a day"));
+            programGroup.Body.Controls.Add(NewInfoNote(
+                "Contacts GitHub once a day; nothing is installed without your confirmation.",
+                "Update check",
+                "AdbAux asks GitHub (api.github.com) for the latest published versions. GitHub receives this PC's IP "
+                + "address and the program name and version; nothing else is sent. A newer version is shown as a "
+                + "notification; nothing is downloaded or installed without your confirmation. The result of the last "
+                + "check is shown on the About tab. If a check fails, AdbAux tries again at its next start, then once a "
+                + "week; after 30 days without a successful check it shows a notification."));
             cbTheme.Width = 200;
             cbTheme.Items.AddRange(new object[] { "Use system setting", "Light", "Dark" });   // order = ThemeChoice
             Control themeField = Labeled("App theme", cbTheme);
@@ -173,7 +194,9 @@ namespace AdbAux
             backupButtons.Controls.Add(NewButton(btnBackup, "Back up settings…", BtnBackup_Click));
             backupButtons.Controls.Add(NewButton(btnRestore, "Restore settings…", BtnRestore_Click));
             backupGroup.Body.Controls.Add(backupButtons);
-            backupGroup.Body.Controls.Add(NewNote(
+            backupGroup.Body.Controls.Add(NewInfoNote(
+                "One file with all settings and tested profiles, for a new PC or before experimenting.",
+                "Back up and restore",
                 "Back up settings… saves the settings in use and all tested profiles to one file, for a new PC or "
                 + "before experimenting (changes not applied yet are not included). Restore settings… fills in this "
                 + "tab from a backup, for you to check and apply, and adds its profiles at once, replacing profiles "
@@ -189,18 +212,21 @@ namespace AdbAux
             lblScrcpyPending.MaximumSize = new Size(540, 0);
             lblScrcpyPending.Tag = "note";
             var scrcpyButtons = new FlowLayoutPanel { AutoSize = true, WrapContents = true, MaximumSize = new Size(560, 0) };
-            scrcpyButtons.Controls.Add(NewButton(btnScrcpyUpdate, "Check for scrcpy updates", (s, e) => CheckScrcpyUpdates("")));
+            scrcpyButtons.Controls.Add(NewButton(btnScrcpyUpdate, "Check for scrcpy updates", async (s, e) => await CheckScrcpyUpdatesAsync("")));
             scrcpyButtons.Controls.Add(NewButton(btnChooseFolder, "Choose folder…", BtnChooseFolder_Click));
             scrcpyButtons.Controls.Add(NewButton(btnAutoFolder, "Use AdbAux folder", (s, e) => SetPendingScrcpyFolder("")));
             scrcpyButtons.Controls.Add(NewButton(btnOpenFolder, "Open folder", (s, e) => OpenInExplorer(controller.ScrcpyDir ?? ScrcpyLocator.AppDir)));
             scrcpyGroup.Body.Controls.Add(lblScrcpy);
             scrcpyGroup.Body.Controls.Add(lblScrcpyPending);
             scrcpyGroup.Body.Controls.Add(scrcpyButtons);
-            scrcpyGroup.Body.Controls.Add(NewNote(
+            scrcpyGroup.Body.Controls.Add(NewInfoNote(
+                "Downloads go only into a folder managed by AdbAux. A different folder is used after Apply.",
+                "scrcpy",
                 "AdbAux installs scrcpy in a scrcpy folder next to AdbAux.exe, or in your user profile "
                 + "(%LOCALAPPDATA%\\AdbAux\\scrcpy) when that folder cannot be written to, for example under Program Files. "
                 + "Check for scrcpy updates compares the installed version with the latest official release and asks "
-                + "before installing; adb is included in scrcpy and updated with it. A different folder is used after Apply."));
+                + "before installing; adb is included in scrcpy and updated with it. Choose folder… uses a scrcpy folder "
+                + "of your own, which AdbAux never changes. A different folder is used after Apply."));
             AddRow(column, scrcpyGroup);
 
             TrackChanges(page);
@@ -240,6 +266,7 @@ namespace AdbAux
             chkTray.Checked = s.MinimizeToTray;
             chkStartWithWindows.Checked = startWithWindowsApplied;
             chkMixerIcon.Checked = s.ShowIconInVolumeMixer;
+            chkUpdates.Checked = s.CheckForUpdates == UpdateCheckChoice.Yes;
             cbTheme.SelectedIndex = (int)s.Theme;
             pendingScrcpyFolder = string.Equals(s.ScrcpyFolder ?? "", settings.ScrcpyFolder ?? "", StringComparison.OrdinalIgnoreCase)
                 ? null : (s.ScrcpyFolder ?? "");
@@ -280,6 +307,9 @@ namespace AdbAux
             c.ResumeMediaOnStart = chkResumeMedia.Checked;
             c.MinimizeToTray = chkTray.Checked;
             c.ShowIconInVolumeMixer = chkMixerIcon.Checked;
+            // Unticked stays "not asked" until the user has answered the question at start or ticked the box once.
+            c.CheckForUpdates = chkUpdates.Checked ? UpdateCheckChoice.Yes
+                : settings.CheckForUpdates == UpdateCheckChoice.NotAsked ? UpdateCheckChoice.NotAsked : UpdateCheckChoice.No;
             c.Theme = (ThemeChoice)Math.Max(0, cbTheme.SelectedIndex);
             if (pendingScrcpyFolder != null)
             {
@@ -359,8 +389,17 @@ namespace AdbAux
             AppSettings applied = SettingsFromControls();
             bool themeChanged = applied.Theme != settings.Theme;
             bool folderChanged = pendingScrcpyFolder != null;
+            bool updatesTurnedOn = applied.CheckForUpdates == UpdateCheckChoice.Yes && settings.CheckForUpdates != UpdateCheckChoice.Yes;
 
             settings.CopyAdvancedSettings(applied);
+            if (updatesTurnedOn)
+            {
+                settings.Updates.Enable(DateTime.UtcNow);   // first check within a minute, when a connection is reported
+            }
+            else if (settings.CheckForUpdates != UpdateCheckChoice.Yes)
+            {
+                HideUpdateLine();
+            }
             pendingScrcpyFolder = null;
             SaveSettingsOrWarn();
             if (chkStartWithWindows.Checked != startWithWindowsApplied)
@@ -390,6 +429,7 @@ namespace AdbAux
             ShowAdbInfo();
             ShowScrcpyPending();
             ShowProfilesKeepingSelection();
+            ShowUpdateResult();
             UpdatePendingState();
         }
 
@@ -477,11 +517,100 @@ namespace AdbAux
                 : "After Apply: " + (pendingScrcpyFolder.Length == 0 ? "folder managed by AdbAux" : pendingScrcpyFolder);
         }
 
+        /// <summary>Where a scrcpy download goes, and what that affects.</summary>
+        private sealed class ScrcpyInstallPlan
+        {
+            public string Target;              // always a folder AdbAux manages
+            public bool UsingChosenFolder;     // AdbAux is set to a folder the user chose, which is not changed
+            public bool StopAdbServer;         // the adb in use runs from the folder being replaced
+        }
+
+        private ScrcpyInstallPlan PlanScrcpyInstall()
+        {
+            // Downloads only ever go into a folder AdbAux manages (next to AdbAux.exe, or
+            // %LOCALAPPDATA%\AdbAux\scrcpy), because the target folder is replaced completely.
+            // A folder the user chose with "Choose folder…" is never changed.
+            string target = ScrcpyLocator.ManagedInstallTarget(controller.ScrcpyDir);
+            string adb = controller.AdbPath;
+            return new ScrcpyInstallPlan
+            {
+                Target = target,
+                UsingChosenFolder = !string.IsNullOrWhiteSpace(settings.ScrcpyFolder),
+                StopAdbServer = adb != null
+                    && string.Equals(Path.GetDirectoryName(Path.GetFullPath(adb)), target, StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        /// <summary>The part of an install question after "… into:": the folder and what installing affects.</summary>
+        private string InstallDetails(ScrcpyInstallPlan plan)
+        {
+            string text = Environment.NewLine + plan.Target + Environment.NewLine + Environment.NewLine
+                + "The download is checked against the developer's SHA-256 list. adb is included in scrcpy and "
+                + "is updated with it. A running stream stops and starts again afterwards.";
+            if (plan.StopAdbServer)
+            {
+                text += " The adb server restarts, which also disconnects other adb devices (for example a TV over Wi-Fi).";
+            }
+            if (plan.UsingChosenFolder)
+            {
+                text += Environment.NewLine + Environment.NewLine
+                    + "Your chosen scrcpy folder is not changed:" + Environment.NewLine + settings.ScrcpyFolder;
+            }
+            return text;
+        }
+
+        /// <summary>Version of the scrcpy in use, or null if scrcpy is not found or its version cannot be read.</summary>
+        private async Task<Version> InstalledScrcpyVersionAsync()
+        {
+            string dir = controller.ScrcpyDir;
+            if (dir == null)
+            {
+                return null;
+            }
+            return ScrcpyInstaller.ParseVersion(await Task.Run(() => ScrcpyLocator.GetVersion(dir)));
+        }
+
+        /// <summary>Downloads and installs a release (the caller has asked the user and set checkingUpdates).</summary>
+        private async Task InstallScrcpyReleaseAsync(ScrcpyRelease latest, ScrcpyInstallPlan plan)
+        {
+            bool installed = false;
+            try
+            {
+                await controller.InstallScrcpyAsync(latest, plan.Target, plan.StopAdbServer);
+                installed = true;
+            }
+            catch (Exception ex)
+            {
+                Log("Download failed: " + ex.Message);
+                MessageBox.Show(this, ex.Message, "Download failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (installed && plan.UsingChosenFolder)
+            {
+                DialogResult switchAnswer = MessageBox.Show(this,
+                    "scrcpy was downloaded to:" + Environment.NewLine + plan.Target + Environment.NewLine + Environment.NewLine
+                    + "AdbAux is set to use your chosen folder instead:" + Environment.NewLine + settings.ScrcpyFolder
+                    + Environment.NewLine + Environment.NewLine + "Use the downloaded copy from now on?",
+                    "Check for scrcpy updates", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (switchAnswer == DialogResult.Yes)
+                {
+                    settings.ScrcpyFolder = "";
+                    SaveSettingsOrWarn();
+                }
+            }
+
+            LocateScrcpy();
+            ShowScrcpyPending();
+            UpdatePendingState();
+        }
+
         /// <summary>
         /// Compares the installed scrcpy with the latest official release, and installs the release
         /// after the user confirms. intro is shown at the start of the question (used at first start).
+        /// A manual check: it does not change the schedule of the automatic check.
+        /// At first start (intro given, scrcpy missing) the user is asked before GitHub is contacted.
         /// </summary>
-        private async void CheckScrcpyUpdates(string intro)
+        private async Task CheckScrcpyUpdatesAsync(string intro)
         {
             if (checkingUpdates || controller.Installing)
             {
@@ -491,6 +620,22 @@ namespace AdbAux
             btnScrcpyUpdate.Enabled = false;
             try
             {
+                bool askedFirst = intro.Length > 0 && controller.ScrcpyDir == null;
+                if (askedFirst)
+                {
+                    DialogResult first = MessageBox.Show(this, intro
+                        + "Download the latest official scrcpy release from GitHub (about 12 MB)?" + Environment.NewLine + Environment.NewLine
+                        + "AdbAux reads the latest version from api.github.com and downloads it from github.com. GitHub "
+                        + "receives this PC's IP address and the program name and version; nothing else is sent. "
+                        + "The download goes into:" + InstallDetails(PlanScrcpyInstall()),
+                        "Download scrcpy", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                    if (first != DialogResult.OK)
+                    {
+                        Log("scrcpy download not started. Use Check for scrcpy updates on the Advanced tab to download it later.");
+                        return;
+                    }
+                }
+
                 Log("Checking the latest scrcpy release on GitHub...");
                 ScrcpyRelease latest;
                 try
@@ -506,24 +651,17 @@ namespace AdbAux
                 }
 
                 string dir = controller.ScrcpyDir;
-                Version installed = null;
-                if (dir != null)
-                {
-                    installed = ScrcpyInstaller.ParseVersion(await Task.Run(() => ScrcpyLocator.GetVersion(dir)));
-                }
+                Version installed = await InstalledScrcpyVersionAsync();
                 string latestText = latest.Version != null ? latest.Version.ToString() : latest.Tag;
                 Log("Latest scrcpy release: " + latest.Tag + "; installed: "
                     + (dir == null ? "none" : installed != null ? installed.ToString() : "unknown version") + ".");
 
-                // Downloads only ever go into a folder AdbAux manages (next to AdbAux.exe, or
-                // %LOCALAPPDATA%\AdbAux\scrcpy), because the target folder is replaced completely.
-                // A folder the user chose with "Choose folder…" is never changed.
-                string target = ScrcpyLocator.ManagedInstallTarget(dir);
-                bool usingChosenFolder = !string.IsNullOrWhiteSpace(settings.ScrcpyFolder);
-                string adb = controller.AdbPath;
-                bool stopAdbServer = adb != null
-                    && string.Equals(Path.GetDirectoryName(Path.GetFullPath(adb)), target, StringComparison.OrdinalIgnoreCase);
-
+                ScrcpyInstallPlan plan = PlanScrcpyInstall();
+                if (askedFirst)
+                {
+                    await InstallScrcpyReleaseAsync(latest, plan);   // already confirmed above
+                    return;
+                }
                 bool upToDate = installed != null && latest.Version != null && installed >= latest.Version;
                 string question;
                 if (dir == null)
@@ -542,18 +680,7 @@ namespace AdbAux
                         + (installed != null ? installed.ToString() : "unknown version") + ")." + Environment.NewLine + Environment.NewLine
                         + "Download and install it (about 12 MB) into:";
                 }
-                question += Environment.NewLine + target + Environment.NewLine + Environment.NewLine
-                    + "The download is checked against the developer's SHA-256 list. adb is included in scrcpy and "
-                    + "is updated with it. A running stream stops and starts again afterwards.";
-                if (stopAdbServer)
-                {
-                    question += " The adb server restarts, which also disconnects other adb devices (for example a TV over Wi-Fi).";
-                }
-                if (usingChosenFolder)
-                {
-                    question += Environment.NewLine + Environment.NewLine
-                        + "Your chosen scrcpy folder is not changed:" + Environment.NewLine + settings.ScrcpyFolder;
-                }
+                question += InstallDetails(plan);
 
                 DialogResult answer = MessageBox.Show(this, question, "Check for scrcpy updates",
                     upToDate ? MessageBoxButtons.YesNo : MessageBoxButtons.OKCancel, MessageBoxIcon.Question,
@@ -562,36 +689,7 @@ namespace AdbAux
                 {
                     return;
                 }
-
-                bool installed2 = false;
-                try
-                {
-                    await controller.InstallScrcpyAsync(latest, target, stopAdbServer);
-                    installed2 = true;
-                }
-                catch (Exception ex)
-                {
-                    Log("Download failed: " + ex.Message);
-                    MessageBox.Show(this, ex.Message, "Download failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-                if (installed2 && usingChosenFolder)
-                {
-                    DialogResult switchAnswer = MessageBox.Show(this,
-                        "scrcpy was downloaded to:" + Environment.NewLine + target + Environment.NewLine + Environment.NewLine
-                        + "AdbAux is set to use your chosen folder instead:" + Environment.NewLine + settings.ScrcpyFolder
-                        + Environment.NewLine + Environment.NewLine + "Use the downloaded copy from now on?",
-                        "Check for scrcpy updates", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (switchAnswer == DialogResult.Yes)
-                    {
-                        settings.ScrcpyFolder = "";
-                        SaveSettingsOrWarn();
-                    }
-                }
-
-                LocateScrcpy();
-                ShowScrcpyPending();
-                UpdatePendingState();
+                await InstallScrcpyReleaseAsync(latest, plan);
             }
             finally
             {

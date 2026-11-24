@@ -57,7 +57,7 @@ Requires the .NET SDK (any current version; it can build for .NET Framework 4.8)
   automatically on connect, not after a restart for changed settings; if nothing is playing, AdbAux presses the
   phone's Play key, which resumes the app that played last). Both send Android media keys over adb
   (`input keyevent` 127 / 126) and read the playback state with `dumpsys media_session`; both are off by
-  default. Keep running in the notification
+  default. Check for AdbAux and scrcpy updates once a day (see *Updates* below). Keep running in the notification
   area when the window is closed; start with Windows (the entry is updated automatically if `AdbAux.exe`
   is moved); show the AdbAux icon in the Windows volume mixer; **App theme**: Use system setting
   (default), Light or Dark. "Use system setting" follows Settings > Personalisation > Colours >
@@ -77,7 +77,8 @@ Requires the .NET SDK (any current version; it can build for .NET Framework 4.8)
   new one is in place. adb is included in scrcpy and updated with it; an Android SDK adb is left to Android
   Studio. **Choose folder…** and **Use AdbAux folder** (used after Apply); **Open folder**. The section shows the
   version, the folder, and whether it is a folder managed by AdbAux or one you chose. If scrcpy is not
-  found at start-up, AdbAux checks for the latest release and offers to install it.
+  found at first start, AdbAux asks whether to download it (default answer: Cancel) and contacts GitHub only
+  after OK.
 
 **Volume mixer icon.** The volume mixer shows the icon of the program that plays the audio, which is
 scrcpy. With the option on, AdbAux runs `scrcpy-adbaux.exe`, a copy of `scrcpy.exe` in the same folder in
@@ -97,6 +98,12 @@ the WCAG 2.2 contrast minimums in both modes (text 4.5:1 or more; outlines of co
 selected states and focus outlines 3:1 or more). Dark mode also covers the title bar, scroll bars and the
 tray menu; message boxes and file dialogs keep Windows' standard style.
 
+**Descriptions.** Each setting or section has a one-line description that holds what is needed to decide,
+including any privacy or safety fact (for example "Contacts GitHub once a day"). The (i) after it opens the
+full explanation in a small panel: on click, Enter or Space (not on hover, which does not work with the
+keyboard or touch); Esc or a click elsewhere closes it. Screen readers get the full explanation as the
+description of the (i) button (`InfoNote.cs`). The hearing-safety note on the Basic tab is shown in full.
+
 **Log**: everything scrcpy and AdbAux report, with *Copy log*, *Clear view* and *Open log folder*. The log is
 for your own troubleshooting: it is also saved to `%LOCALAPPDATA%\AdbAux\logs\adbaux.log` (about 1 MB,
 previous file kept as `adbaux.old.log`), stays on your PC, and contains the phone's model and serial
@@ -104,7 +111,22 @@ number. Stops made by AdbAux itself are labelled with their reason; anything els
 "exited unexpectedly". Unexpected program errors are written to the same file, and AdbAux closes
 with a message pointing to it.
 
-**About**: version, licence, short disclaimer, scrcpy credit and folder, settings file location.
+**About**: version, *Check for AdbAux updates*, the result of the last automatic update check, link to the
+releases page, licence, short disclaimer, scrcpy credit and folder, settings file location.
+
+**Updates** (`Updates.cs`, `MainForm.Updates.cs`). At first start, AdbAux asks once whether it may check for
+updates automatically (default answer: No); the answer can be changed on the Advanced tab. When on, AdbAux
+asks GitHub's public API once a day for the latest published release of AdbAux and of scrcpy (drafts and
+pre-releases are not included), waiting until Windows reports an internet connection. A newer version that
+was not skipped is shown as a notification and a line on the Basic tab; clicking either offers
+*Open release page / Later / Skip this version* for AdbAux (AdbAux never replaces its own exe) and
+*Install / Later / Skip this version* for scrcpy (the same checked install as *Check for scrcpy updates*).
+If the automatic check fails, the next try is at the next start of AdbAux, then 7 days after the first
+failure, then weekly. The first failure shows a line on the Basic tab; after 30 days without a successful
+check, each failure also shows a notification. A certificate error is reported with a notification at once,
+because something may be intercepting secure connections; GitHub's request limit is never reported, and the
+check waits for the time GitHub gives. Manual checks show their result directly and do not change this
+schedule. The schedule and skipped versions are stored in `settings.xml`, but not in a settings backup.
 
 Starting `AdbAux.exe` while it is already running brings the running window to the front.
 
@@ -160,6 +182,10 @@ the old one has closed).
 | `src/MainForm.cs` | Window, tray icon, status, notifications, Basic-tab selections |
 | `src/MainForm.Pages.cs` | Basic, Log and About tabs; layout helpers |
 | `src/MainForm.Advanced.cs` | Advanced tab: Apply / Discard, adb and scrcpy settings, scrcpy download |
+| `src/Updates.cs` | Update checks: GitHub release requests and their errors, schedule and messages of the automatic check |
+| `src/MainForm.Updates.cs` | Update question at first start, automatic check, Basic-tab line, About-tab result |
+| `src/UpdateDialog.cs` | The dialog offered when a newer version is found (three choices) |
+| `src/InfoNote.cs` | One-line description with an (i) button and its details panel |
 | `src/MainForm.Profiles.cs` | Tested profiles section |
 | `src/ProfileDialog.cs` | Name, comment and phone link of a profile |
 | `tools/make_icon.py` | Draws the icon (Python with Pillow) |
@@ -168,5 +194,5 @@ the old one has closed).
 
 `..\test.cmd` runs the unit tests in `..\tests\AdbAux.Tests` (xUnit): parsing of `adb devices -l`, the scrcpy
 command line and quoting, profile checks, export and import (including files that must be refused), settings
-backup and restore, reading scrcpy version numbers for the update check, and a check that every
-Advanced-tab setting is compared and copied by Apply.
+backup and restore, reading version numbers for the update checks, the schedule and messages of the automatic
+update check, and a check that every Advanced-tab setting is compared and copied by Apply.

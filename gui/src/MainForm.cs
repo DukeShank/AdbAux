@@ -55,6 +55,7 @@ namespace AdbAux
         private readonly Icon appIcon;
         private readonly ContextMenuStrip trayMenu = new ContextMenuStrip();
         private NotifyIcon tray;
+        private Action balloonAction;             // what clicking the current notification does, besides opening the window
 
         public MainForm(bool startHidden)
         {
@@ -129,12 +130,13 @@ namespace AdbAux
             LocateScrcpy();
             controller.BeginPolling();
 
-            // First run on a new PC: offer to download scrcpy straight away.
-            if (controller.ScrcpyDir == null && !startHidden)
+            // First start: offer to download scrcpy if it is missing, then ask about automatic update checks.
+            // When AdbAux starts hidden (Start with Windows), the update question waits until the window is opened.
+            if (!startHidden)
             {
-                BeginInvoke(new Action(() => CheckScrcpyUpdates(
-                    "AdbAux uses scrcpy (free, open source) to capture the phone's audio, and it was not found." + Environment.NewLine + Environment.NewLine)));
+                BeginInvoke(new Action(AskStartQuestions));
             }
+            StartUpdateTimer();
         }
 
         protected override void OnShown(EventArgs e)
@@ -163,6 +165,7 @@ namespace AdbAux
             }
 
             base.OnFormClosing(e);
+            updateTimer.Stop();
             controller.Shutdown(!restarting);   // stops scrcpy (and pauses the phone's media, if set)
             tray.Visible = false;
             tray.Dispose();
@@ -187,6 +190,10 @@ namespace AdbAux
             ShowInTaskbar = true;
             WindowState = FormWindowState.Normal;
             Activate();
+            if (settings.CheckForUpdates == UpdateCheckChoice.NotAsked)
+            {
+                BeginInvoke(new Action(AskUpdateConsent));   // AdbAux was started hidden: ask now that the window is open
+            }
         }
 
         private void ExitApplication()
@@ -314,8 +321,11 @@ namespace AdbAux
             UpdatePendingState();   // whether Apply would restart the stream depends on the stream state
         }
 
-        /// <summary>Shows a tray notification (Windows 10/11 show it as a pop-up and in the notification centre).</summary>
-        private void Notify(string title, string text, ToolTipIcon icon)
+        /// <summary>
+        /// Shows a tray notification (Windows 10/11 show it as a pop-up and in the notification centre).
+        /// Clicking it opens the window and then runs onClick, if given.
+        /// </summary>
+        private void Notify(string title, string text, ToolTipIcon icon, Action onClick = null)
         {
             if (tray == null || string.IsNullOrEmpty(text))
             {
@@ -325,6 +335,7 @@ namespace AdbAux
             {
                 text = text.Substring(0, 247) + "...";   // Windows limit: 255 characters
             }
+            balloonAction = onClick;
             tray.ShowBalloonTip(5000, title, text, icon);
         }
 
@@ -340,7 +351,17 @@ namespace AdbAux
             trayMenu.Items.Add("Exit", null, (s, e) => ExitApplication());
             tray.ContextMenuStrip = trayMenu;
             tray.DoubleClick += (s, e) => ShowFromTray();
-            tray.BalloonTipClicked += (s, e) => ShowFromTray();
+            tray.BalloonTipClicked += (s, e) =>
+            {
+                Action action = balloonAction;
+                balloonAction = null;
+                ShowFromTray();
+                if (action != null)
+                {
+                    action();
+                }
+            };
+            tray.BalloonTipClosed += (s, e) => balloonAction = null;
         }
 
         private static Color ToColor(StatusLevel level)

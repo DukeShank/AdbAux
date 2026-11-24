@@ -105,6 +105,12 @@ namespace AdbAux
         public bool NotifyStreaming = true;    // streaming started (not after a settings restart)
         public bool NotifyErrors = true;       // scrcpy stopped unexpectedly while the phone is connected
 
+        // Automatic update check for AdbAux and scrcpy (asked once at first start; see Updates.cs).
+        public UpdateCheckChoice CheckForUpdates = UpdateCheckChoice.NotAsked;
+
+        // Schedule and results of the automatic update check on this PC (not included in a settings backup).
+        public UpdateState Updates = new UpdateState();
+
         // Tested profiles: values the user tested on a phone and audio device combination (see Profiles.cs).
         public List<TestedProfile> Profiles = new List<TestedProfile>();
 
@@ -168,7 +174,8 @@ namespace AdbAux
                 && Theme == o.Theme
                 && NotifyConnection == o.NotifyConnection
                 && NotifyStreaming == o.NotifyStreaming
-                && NotifyErrors == o.NotifyErrors;
+                && NotifyErrors == o.NotifyErrors
+                && CheckForUpdates == o.CheckForUpdates;
         }
 
         /// <summary>Copies the Advanced-tab settings from another object.</summary>
@@ -193,6 +200,7 @@ namespace AdbAux
             NotifyConnection = o.NotifyConnection;
             NotifyStreaming = o.NotifyStreaming;
             NotifyErrors = o.NotifyErrors;
+            CheckForUpdates = o.CheckForUpdates;
         }
 
         private static bool SameText(string a, string b)
@@ -228,6 +236,15 @@ namespace AdbAux
             {
                 Theme = ThemeChoice.System;
             }
+            if (!Enum.IsDefined(typeof(UpdateCheckChoice), CheckForUpdates))
+            {
+                CheckForUpdates = UpdateCheckChoice.NotAsked;
+            }
+            if (Updates == null)
+            {
+                Updates = new UpdateState();
+            }
+            Updates.Sanitize();
             if (Profiles == null)
             {
                 Profiles = new List<TestedProfile>();
