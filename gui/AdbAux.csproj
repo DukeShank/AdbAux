@@ -45,4 +45,11 @@
     <EmbeddedResource Include="app.ico" LogicalName="AdbAux.app.ico" />
   </ItemGroup>
 
+  <!-- The privacy statement and the licence are built into the exe, so About can show them offline.
+       The files in the repository root are the only copies, so the program and the website never differ. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\PRIVACY.md" LogicalName="AdbAux.PRIVACY.md" Visible="false" />
+    <EmbeddedResource Include="..\LICENSE" LogicalName="AdbAux.LICENSE" Visible="false" />
+  </ItemGroup>
+
 </Project>

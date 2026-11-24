@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace AdbAux
@@ -172,9 +173,17 @@ namespace AdbAux
             lblUpdateResult.MaximumSize = new Size(560, 0);
             lblUpdateResult.Tag = "note";
             AddRow(column, lblUpdateResult);
-            var releasesLink = new LinkLabel { Text = GitHub.AdbAuxReleasesUrl, AutoSize = true };
-            releasesLink.LinkClicked += (s, e) => OpenUrl(GitHub.AdbAuxReleasesUrl);
-            AddRow(column, releasesLink);
+
+            // Related links. Privacy and Licence open the copies built into AdbAux (readable offline).
+            var links = new FlowLayoutPanel { AutoSize = true, WrapContents = true, MaximumSize = new Size(560, 0) };
+            links.Controls.Add(NewLink("Project page", () => OpenUrl(GitHub.AdbAuxProjectUrl)));
+            links.Controls.Add(NewLink("Releases", () => OpenUrl(GitHub.AdbAuxReleasesUrl)));
+            links.Controls.Add(NewLink("Privacy", () => ShowDocument("AdbAux privacy statement", "AdbAux.PRIVACY.md",
+                GitHub.AdbAuxProjectUrl + "/blob/main/PRIVACY.md")));
+            links.Controls.Add(NewLink("Licence", () => ShowDocument("AdbAux licence", "AdbAux.LICENSE",
+                GitHub.AdbAuxProjectUrl + "/blob/main/LICENSE")));
+            links.Controls.Add(NewLink("Report a problem", () => OpenUrl(GitHub.AdbAuxIssuesUrl)));
+            AddRow(column, links);
 
             AddRow(column, NewText(
                 "Plays an Android phone's audio on this PC over a USB cable, uncompressed "
@@ -327,6 +336,40 @@ namespace AdbAux
                 Margin = new Padding(3, 4, 3, 6),
                 Tag = "note"   // shown in the secondary text colour of the current theme
             };
+        }
+
+        private static LinkLabel NewLink(string text, Action onClick)
+        {
+            var link = new LinkLabel { Text = text, AutoSize = true, Margin = new Padding(0, 0, 20, 4) };
+            link.LinkClicked += (s, e) => onClick();
+            return link;
+        }
+
+        /// <summary>
+        /// Shows a document built into the exe (see AdbAux.csproj). If it is missing, opens the copy on GitHub.
+        /// </summary>
+        private void ShowDocument(string title, string resourceName, string onlineUrl)
+        {
+            string text = null;
+            using (Stream stream = typeof(MainForm).Assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream != null)
+                {
+                    using (var reader = new StreamReader(stream, Encoding.UTF8))
+                    {
+                        text = reader.ReadToEnd();
+                    }
+                }
+            }
+            if (text == null)
+            {
+                OpenUrl(onlineUrl);
+                return;
+            }
+            using (var dialog = new TextDialog(title, PlainText.FromMarkdown(text), Theme.IsDark(settings.Theme)))
+            {
+                dialog.ShowDialog(this);
+            }
         }
 
         /// <summary>

@@ -271,9 +271,19 @@ namespace AdbAux
         public const string ScrcpyRepository = "Genymobile/scrcpy";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);
 
+        public static string AdbAuxProjectUrl
+        {
+            get { return "https://github.com/" + AdbAuxRepository; }
+        }
+
         public static string AdbAuxReleasesUrl
         {
-            get { return "https://github.com/" + AdbAuxRepository + "/releases"; }
+            get { return AdbAuxProjectUrl + "/releases"; }
+        }
+
+        public static string AdbAuxIssuesUrl
+        {
+            get { return AdbAuxProjectUrl + "/issues"; }
         }
 
         public static HttpClient NewClient()

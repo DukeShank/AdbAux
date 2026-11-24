@@ -130,25 +130,14 @@ to the PC through ADB. Nothing remains installed on the phone.
 
 ## Privacy and logs
 
-AdbAux has no telemetry and collects no data. It connects to the internet only for the following, and only
-to GitHub (`api.github.com` for release information, `github.com` for downloads):
+AdbAux has no telemetry and collects no data. It contacts only GitHub: for the optional daily update check
+(asked once at first start), when you click a *Check for … updates* button, and to download scrcpy after you
+confirm. Audio travels only over the USB cable. The full statement is in [`PRIVACY.md`](PRIVACY.md), and
+AdbAux shows it under **About > Privacy**.
 
-- **Automatic update check (optional).** At first start, AdbAux asks whether it may check for updates. If you
-  answer Yes, it asks GitHub once a day for the latest published versions of AdbAux and scrcpy, and shows a
-  notification when a newer version exists. Turn it on or off on the Advanced tab, under *General*.
-- **Manual checks.** *Check for AdbAux updates* (About tab) and *Check for scrcpy updates* (Advanced tab),
-  only when you click them.
-- **scrcpy download.** At first start, if scrcpy is not found, AdbAux asks whether to download it, and contacts
-  GitHub only if you answer OK. Updates of scrcpy are also installed only after you confirm.
-
-Each request sends GitHub this PC's IP address and the program name and version (for example `AdbAux/0.6.0`);
-nothing else. AdbAux never downloads or replaces its own exe: for a new AdbAux version, it opens the release
-page. Audio travels only over the USB cable between the phone and the PC.
-
-AdbAux keeps a log for **your own troubleshooting** in `%LOCALAPPDATA%\AdbAux\logs\adbaux.log`
-(limited to about 1 MB; the previous file is kept as `adbaux.old.log`). It stays on your PC and is never
-sent anywhere. It contains your phone's model and serial number, so remove them before sharing a log,
-for example in a bug report. Unexpected errors are written to the same file.
+AdbAux keeps a log for **your own troubleshooting** in `%LOCALAPPDATA%\AdbAux\logs\adbaux.log`. It stays on
+your PC, but it contains your phone's model and serial number: remove them before sharing a log, for example
+in a bug report.
 
 ## Troubleshooting
 

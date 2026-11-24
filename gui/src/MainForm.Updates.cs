@@ -58,7 +58,8 @@ namespace AdbAux
                 + "scrcpy. GitHub receives this PC's IP address and the program name and version (AdbAux/" + AppInfo.Version
                 + "); nothing else is sent. If a newer version exists, AdbAux shows a notification. Nothing is downloaded "
                 + "or installed without your confirmation." + Environment.NewLine + Environment.NewLine
-                + "You can change this later on the Advanced tab, under General.",
+                + "You can change this later on the Advanced tab, under General. The privacy statement is under "
+                + "About > Privacy.",
                 "Check for updates", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
             bool yes = answer == DialogResult.Yes;
             settings.CheckForUpdates = yes ? UpdateCheckChoice.Yes : UpdateCheckChoice.No;

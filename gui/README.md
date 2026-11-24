@@ -111,8 +111,10 @@ number. Stops made by AdbAux itself are labelled with their reason; anything els
 "exited unexpectedly". Unexpected program errors are written to the same file, and AdbAux closes
 with a message pointing to it.
 
-**About**: version, *Check for AdbAux updates*, the result of the last automatic update check, link to the
-releases page, licence, short disclaimer, scrcpy credit and folder, settings file location.
+**About**: version, *Check for AdbAux updates*, the result of the last automatic update check, and the links
+*Project page*, *Releases*, *Privacy*, *Licence* and *Report a problem*. *Privacy* and *Licence* show
+`PRIVACY.md` and `LICENSE`, which are built into the exe, so they can be read offline (`TextDialog.cs`).
+Below: description, licence notice, short disclaimer, scrcpy credit and folder, settings file location.
 
 **Updates** (`Updates.cs`, `MainForm.Updates.cs`). At first start, AdbAux asks once whether it may check for
 updates automatically (default answer: No); the answer can be changed on the Advanced tab. When on, AdbAux
@@ -188,6 +190,7 @@ the old one has closed).
 | `src/MainForm.Updates.cs` | Update question at first start, automatic check, Basic-tab line, About-tab result |
 | `src/UpdateDialog.cs` | The dialog offered when a newer version is found (three choices) |
 | `src/InfoNote.cs` | One-line description with an (i) button and its details panel |
+| `src/TextDialog.cs` | Window that shows the built-in privacy statement or licence |
 | `src/MainForm.Profiles.cs` | Tested profiles section |
 | `src/ProfileDialog.cs` | Name, comment and phone link of a profile |
 | `tools/make_icon.py` | Draws the icon (Python with Pillow) |
@@ -197,4 +200,4 @@ the old one has closed).
 `..\test.cmd` runs the unit tests in `..\tests\AdbAux.Tests` (xUnit): parsing of `adb devices -l`, the scrcpy
 command line and quoting, profile checks, export and import (including files that must be refused), settings
 backup and restore, reading version numbers for the update checks, the schedule and messages of the automatic
-update check, and a check that every Advanced-tab setting is compared and copied by Apply.
+update check, the built-in documents, and a check that every Advanced-tab setting is compared and copied by Apply.
