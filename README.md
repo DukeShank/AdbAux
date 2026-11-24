@@ -19,7 +19,8 @@ Nothing is installed on the phone.
 - Starts streaming automatically when the phone is plugged in, and resumes after a reconnect.
 - Optional: pauses the phone's media when you stop streaming, and resumes it when streaming starts.
 - Runs in the notification area, optionally starts with Windows, optional notifications.
-- Checks for scrcpy updates and installs them from the official releases after asking, verified with SHA-256.
+- Optional daily update check for AdbAux and scrcpy (asked once at first start). scrcpy updates are installed
+  from the official releases only after you confirm, verified with SHA-256.
 - Back up and restore all settings and tested profiles in one file.
 - A single `AdbAux.exe` with no runtime to install (.NET Framework 4.8 is part of Windows).
 
@@ -57,19 +58,16 @@ Auto Blocker back on when you disconnect. To revoke access: **Developer options 
 - **Basic tab:** choose what you are playing (Music / Video / Low latency) and what happens to
   notifications, ringtones and alarms. Start / Stop, and *Open volume mixer* (Windows' per-app sound
   settings) to pick the output device.
-- **Advanced tab:** buffer size for each content type, what is selected at start-up, *Tested profiles*
-  (save the values that work for each phone and audio device combination, switch between them, select one
-  automatically when its phone is connected, and export or import them to share tested values), scrcpy
-  options, notifications, which adb to use, automatic start, start with Windows, the volume mixer icon,
-  app theme (system setting, light or dark), back up and restore of all settings, and the scrcpy folder
-  and update check. Changes on this tab take effect when you click **Apply**; AdbAux says beforehand when
-  applying restarts the stream.
+- **Advanced tab:** buffers, start-up selections, *Tested profiles* (the values that work for a phone and
+  audio device combination; export them to share), scrcpy and adb options, notifications, general behaviour,
+  back up and restore, and the scrcpy folder. Changes take effect when you click **Apply**.
 - **Log tab:** everything scrcpy reports, for troubleshooting.
+- **About tab:** version, update check, privacy statement, licence and project links.
 - **Tray icon:** the badge colour shows the state: grey = waiting for phone, yellow = not authorised,
   blue = connected or starting, green = streaming, red = error. Right-click for Open, Start, Stop,
   Restart streaming, Restart AdbAux and Exit.
 
-Details: [`gui/README.md`](gui/README.md).
+Each setting has a one-line description in the program; its (i) button shows the details.
 
 ### Which sounds go to the PC
 
@@ -95,19 +93,8 @@ specific `adb.exe`, so AdbAux and scrcpy use the same adb as your other tools.
 
 ## Building from source
 
-Requires the [.NET SDK](https://dotnet.microsoft.com/download) (any current version), for example
-`winget install Microsoft.DotNet.SDK.10`.
-
-```
-gui\build.cmd
-```
-This runs `dotnet build gui\AdbAux.csproj -c Release` and copies `AdbAux.exe` to the repository folder.
-
-```
-test.cmd
-```
-This runs the unit tests in `tests\AdbAux.Tests` (the first run downloads the xUnit test packages from nuget.org).
-GitHub Actions builds and tests every push (`.github/workflows/build.yml`).
+Run `gui\build.cmd` to build and `test.cmd` to run the unit tests; both need the
+[.NET SDK](https://dotnet.microsoft.com/download). Details and an overview of the code: [`gui/README.md`](gui/README.md).
 
 ## How it works
 
